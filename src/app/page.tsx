@@ -1,65 +1,93 @@
-import Image from "next/image";
+"use client";
+
+import Link from "next/link";
+import { Trophy } from "@/components/Trophy";
+import { NavBar } from "@/components/NavBar";
+import { COURSE } from "@/lib/constants";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <>
+      <NavBar />
+      <main className="flex flex-col items-center px-4 py-8 md:py-16">
+        {/* Hero */}
+        <div className="flex flex-col items-center text-center mb-12">
+          <Trophy size={140} />
+          <h1
+            className="text-4xl md:text-6xl mt-6 mb-3 tracking-wide"
+            style={{ fontFamily: "var(--font-bungee)" }}
+          >
+            <span className="text-yellow-400">The Hahei</span>{" "}
+            <span className="text-white">Classic</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-white/60 text-lg md:text-xl max-w-md">
+            Battle for glory at Mercury Bay Golf Club
           </p>
+          <div className="flex items-center gap-2 mt-3 text-white/40 text-sm">
+            <span>⛳</span>
+            <span>{COURSE.location}</span>
+            <span>&middot;</span>
+            <span>Par {COURSE.par}</span>
+            <span>&middot;</span>
+            <span>{COURSE.holes} holes</span>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        {/* Action buttons */}
+        <div className="grid gap-4 w-full max-w-md mb-16">
+          <Link
+            href="/leaderboard"
+            className="flex items-center gap-4 px-6 py-5 rounded-2xl bg-gradient-to-r from-yellow-400 to-amber-500 text-green-900 font-bold text-lg shadow-lg shadow-yellow-400/20 hover:shadow-yellow-400/40 transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <span className="text-3xl">🏁</span>
+            <div>
+              <div>Live Leaderboard</div>
+              <div className="text-green-800/70 text-sm font-medium">
+                Watch the horse race!
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            href="/scores"
+            className="flex items-center gap-4 px-6 py-5 rounded-2xl bg-white/10 border border-white/20 text-white font-bold text-lg hover:bg-white/15 transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
-            Documentation
-          </a>
+            <span className="text-3xl">📝</span>
+            <div>
+              <div>Enter Scores</div>
+              <div className="text-white/50 text-sm font-medium">
+                Add your round score
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            href="/players"
+            className="flex items-center gap-4 px-6 py-5 rounded-2xl bg-white/10 border border-white/20 text-white font-bold text-lg hover:bg-white/15 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <span className="text-3xl">⛳</span>
+            <div>
+              <div>Manage Players</div>
+              <div className="text-white/50 text-sm font-medium">
+                Add players & handicaps
+              </div>
+            </div>
+          </Link>
+        </div>
+
+        {/* Course info */}
+        <div className="w-full max-w-md">
+          <div className="px-6 py-5 rounded-2xl bg-white/5 border border-white/10">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-2xl">🏌️</span>
+              <h3 className="text-white font-bold text-lg">{COURSE.name}</h3>
+            </div>
+            <p className="text-white/50 text-sm leading-relaxed">
+              {COURSE.description}
+            </p>
+          </div>
         </div>
       </main>
-    </div>
+    </>
   );
 }

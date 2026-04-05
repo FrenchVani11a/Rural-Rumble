@@ -1,26 +1,36 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-display: "Bungee Shade", cursive;
+  --font-body: "Inter", system-ui, sans-serif;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-fairway: #2D5016;
+  --color-fairway-dark: #1a3a0e;
+  --color-fairway-light: #4A7C2E;
+  --color-gold: #FFD700;
+  --color-sunset: #FF6B35;
+  --color-sand: #F5E6C8;
+  --color-sky: #87CEEB;
+  --color-turf: #90EE90;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  background: linear-gradient(135deg, #0a1f0a 0%, #0d2b0d 50%, #0a1f0a 100%);
+  color: #fff;
+  min-height: 100vh;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Fairway stripe animation for the race track */
+@keyframes fairway-scroll {
+  0% { background-position: 0 0; }
+  100% { background-position: 80px 0; }
 }
