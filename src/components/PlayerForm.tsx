@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Player } from "@/lib/types";
 
 interface PlayerFormProps {
@@ -13,6 +13,11 @@ export function PlayerForm({ onSubmit, editingPlayer, onCancel }: PlayerFormProp
   const [name, setName] = useState(editingPlayer?.name ?? "");
   const [handicap, setHandicap] = useState(editingPlayer?.handicap?.toString() ?? "");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    setName(editingPlayer?.name ?? "");
+    setHandicap(editingPlayer?.handicap?.toString() ?? "");
+  }, [editingPlayer]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
