@@ -56,7 +56,7 @@ export function RaceLane({ entry, isLeader }: RaceLaneProps) {
 
   return (
     <div
-      className={`relative h-[72px] md:h-[88px] ${
+      className={`relative h-[56px] md:h-[68px] ${
         isLeader ? "leader-glow" : ""
       }`}
     >
@@ -114,7 +114,7 @@ export function RaceLane({ entry, isLeader }: RaceLaneProps) {
           <GolfCart
             color={player.avatar_color}
             initials={getInitials(player.name)}
-            size={36}
+            size={30}
           />
         </motion.div>
       </motion.div>
