@@ -4,6 +4,7 @@ import { useState } from "react";
 import { NavBar } from "@/components/NavBar";
 import { RaceTrack } from "@/components/horse-race/RaceTrack";
 import { RaceReplay } from "@/components/RaceReplay";
+import { HoleSelector } from "@/components/HoleSelector";
 import { Awards } from "@/components/Awards";
 import { ChatBoard } from "@/components/ChatBoard";
 import { useRealtimeLeaderboard } from "@/hooks/useRealtimeLeaderboard";
@@ -13,6 +14,7 @@ import { COURSE } from "@/lib/constants";
 export default function LeaderboardPage() {
   const { leaderboard, loading, players, scores } = useRealtimeLeaderboard();
   const [replayMode, setReplayMode] = useState(false);
+  const [selectedHole, setSelectedHole] = useState(0); // 0 = live
 
   const leaderId =
     leaderboard.length > 0 && leaderboard[0].score
@@ -55,7 +57,7 @@ export default function LeaderboardPage() {
           </div>
         ) : (
           <>
-            {/* Race track or replay */}
+            {/* Race track, replay, or hole selector */}
             {replayMode ? (
               <RaceReplay
                 players={players}
@@ -63,7 +65,20 @@ export default function LeaderboardPage() {
                 onExit={() => setReplayMode(false)}
               />
             ) : (
-              <RaceTrack entries={leaderboard} />
+              <>
+                {/* Hole selector */}
+                {hasScores && (
+                  <HoleSelector
+                    players={players}
+                    scores={scores}
+                    selectedHole={selectedHole}
+                    onHoleChange={setSelectedHole}
+                  />
+                )}
+
+                {/* Live race track (shown when hole selector is on LIVE or no scores) */}
+                {selectedHole === 0 && <RaceTrack entries={leaderboard} />}
+              </>
             )}
 
             {/* Score table */}

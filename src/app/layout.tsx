@@ -33,7 +33,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${bungeeShade.variable}`}>
-      <body className="min-h-screen pb-20 md:pb-0">{children}</body>
+      <body className="min-h-screen">{children}</body>
     </html>
   );
 }

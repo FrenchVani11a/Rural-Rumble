@@ -15,16 +15,53 @@ interface AwardDef {
   name: string;
   emoji: string;
   color: string;
+  description: string;
   compute: (players: Player[], scores: Score[]) => AwardResult | null;
 }
 
 const AWARDS: AwardDef[] = [
-  { name: "The Hahei Horror", emoji: "😱", color: "text-red-400", compute: computeHaheiHorror },
-  { name: "Best Par 3", emoji: "🎯", color: "text-teal-400", compute: computeBestPar3 },
-  { name: "Back 9 Bandit", emoji: "🦹", color: "text-purple-400", compute: computeBack9Bandit },
-  { name: "Birdie King", emoji: "🐦", color: "text-green-400", compute: computeBirdieKing },
-  { name: "Bogey Train", emoji: "🚂", color: "text-orange-400", compute: computeBogeyTrain },
-  { name: "Steady Eddie", emoji: "⚖️", color: "text-blue-400", compute: computeSteadyEddie },
+  {
+    name: "The Hahei Horror",
+    emoji: "😱",
+    color: "text-red-400",
+    description: "Worst single hole — highest gross score over par on any hole.",
+    compute: computeHaheiHorror,
+  },
+  {
+    name: "Best Par 3",
+    emoji: "🎯",
+    color: "text-teal-400",
+    description: "Lowest combined net score across all par 3 holes (2, 4, 6, 12, 14, 18).",
+    compute: computeBestPar3,
+  },
+  {
+    name: "Back 9 Bandit",
+    emoji: "🦹",
+    color: "text-purple-400",
+    description: "Lowest net score on the back 9 (holes 10-18). Strong finisher wins.",
+    compute: computeBack9Bandit,
+  },
+  {
+    name: "Birdie King",
+    emoji: "🐦",
+    color: "text-green-400",
+    description: "Most holes scored under par (net). Birdies and eagles both count.",
+    compute: computeBirdieKing,
+  },
+  {
+    name: "Bogey Train",
+    emoji: "🚂",
+    color: "text-orange-400",
+    description: "Longest streak of consecutive bogeys or worse (net). All aboard!",
+    compute: computeBogeyTrain,
+  },
+  {
+    name: "Steady Eddie",
+    emoji: "⚖️",
+    color: "text-blue-400",
+    description: "Most holes scored exactly on par (net). Consistency is king.",
+    compute: computeSteadyEddie,
+  },
 ];
 
 export function Awards({ players, scores }: { players: Player[]; scores: Score[] }) {
@@ -53,12 +90,15 @@ export function Awards({ players, scores }: { players: Player[]; scores: Score[]
               award.result ? "" : "opacity-30"
             }`}
           >
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-1">
               <span className="text-2xl">{award.emoji}</span>
               <span className={`font-bold text-sm ${award.color}`}>
                 {award.name}
               </span>
             </div>
+            <p className="text-white/30 text-[11px] leading-tight mb-2">
+              {award.description}
+            </p>
             {award.result ? (
               <>
                 <div className="text-white font-bold text-lg">

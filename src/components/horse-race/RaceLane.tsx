@@ -56,21 +56,30 @@ export function RaceLane({ entry, isLeader }: RaceLaneProps) {
 
   return (
     <div
-      className={`relative h-20 md:h-24 border-b-2 border-dashed border-white/20 ${
-        isLeader ? "bg-yellow-400/10" : ""
+      className={`relative h-[72px] md:h-[88px] ${
+        isLeader ? "leader-glow" : ""
       }`}
     >
+      {/* Lane separator — grass mowing pattern */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-white/10" />
+      <div className="absolute bottom-1 left-0 right-0 h-px bg-black/15" />
+
+      {/* Leader highlight */}
+      {isLeader && (
+        <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/5 via-yellow-400/10 to-yellow-400/5" />
+      )}
+
       {/* Rank badge */}
       <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20">
         <div
-          className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shadow-lg ${
             rank === 1
-              ? "bg-yellow-400 text-yellow-900"
+              ? "bg-gradient-to-b from-yellow-300 to-yellow-500 text-yellow-900 ring-2 ring-yellow-400/50"
               : rank === 2
-              ? "bg-gray-300 text-gray-800"
+              ? "bg-gradient-to-b from-gray-200 to-gray-400 text-gray-800"
               : rank === 3
-              ? "bg-amber-600 text-white"
-              : "bg-white/20 text-white"
+              ? "bg-gradient-to-b from-amber-500 to-amber-700 text-white"
+              : "bg-white/15 text-white/60 backdrop-blur-sm"
           }`}
         >
           {rank}
@@ -88,10 +97,8 @@ export function RaceLane({ entry, isLeader }: RaceLaneProps) {
           mass: 1.5,
         }}
       >
-        {/* Dust trail */}
         <DustTrail intensity={dustIntensity} />
 
-        {/* Cart with optional spin-out */}
         <motion.div
           animate={
             isSpinningOut
@@ -107,29 +114,37 @@ export function RaceLane({ entry, isLeader }: RaceLaneProps) {
           <GolfCart
             color={player.avatar_color}
             initials={getInitials(player.name)}
-            size={40}
+            size={36}
           />
         </motion.div>
       </motion.div>
 
       {/* Player info (right side) */}
-      <div className="absolute right-8 top-1/2 -translate-y-1/2 text-right z-20">
-        <div className="text-white font-bold text-sm md:text-base truncate max-w-[120px]">
+      <div className="absolute right-9 top-1/2 -translate-y-1/2 text-right z-20">
+        <div className="text-white font-bold text-xs md:text-sm truncate max-w-[100px] md:max-w-[140px]">
           {player.name}
         </div>
         {score ? (
-          <div className="text-white/70 text-xs md:text-sm">
-            Net {score.net_score}
-            <span className="ml-1 text-white/50">
+          <div className="text-white/60 text-[10px] md:text-xs flex items-center justify-end gap-1">
+            <span className="font-semibold text-white/80">Net {score.net_score}</span>
+            <span
+              className={`font-bold px-1 py-0.5 rounded text-[9px] ${
+                toPar! < 0
+                  ? "bg-green-500/20 text-green-400"
+                  : toPar === 0
+                  ? "bg-white/10 text-white/60"
+                  : "bg-red-500/20 text-red-400"
+              }`}
+            >
               {toPar! > 0 ? "+" : ""}
               {toPar === 0 ? "E" : toPar}
             </span>
-            <span className="ml-1 text-white/30">
-              (Thru {score.holes_played ?? 18})
+            <span className="text-white/30 hidden md:inline">
+              Thru {score.holes_played ?? 18}
             </span>
           </div>
         ) : (
-          <div className="text-white/40 text-xs">No score yet</div>
+          <div className="text-white/30 text-[10px]">No score yet</div>
         )}
       </div>
     </div>

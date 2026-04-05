@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Trophy } from "@/components/Trophy";
 import { NavBar } from "@/components/NavBar";
 import { WeatherWidget } from "@/components/WeatherWidget";
+import { Commissioner } from "@/components/Commissioner";
 import { COURSE } from "@/lib/constants";
 
 export default function Home() {
@@ -75,6 +76,11 @@ export default function Home() {
               </div>
             </div>
           </Link>
+        </div>
+
+        {/* The Commissioner */}
+        <div className="w-full max-w-md mb-8">
+          <Commissioner />
         </div>
 
         {/* Course info */}
