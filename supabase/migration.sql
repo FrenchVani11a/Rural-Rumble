@@ -10,12 +10,15 @@ create table if not exists players (
   created_at timestamptz not null default now()
 );
 
--- Scores table (one score per player)
+-- Scores table (one score per player, with hole-by-hole data)
 create table if not exists scores (
   id uuid primary key default gen_random_uuid(),
   player_id uuid not null references players(id) on delete cascade,
-  gross_score integer not null check (gross_score >= 30 and gross_score <= 200),
+  gross_score integer not null check (gross_score >= 0 and gross_score <= 300),
   net_score integer not null,
+  hole_scores jsonb not null default '[]'::jsonb,
+  holes_played integer not null default 0,
+  par_played integer not null default 0,
   created_at timestamptz not null default now(),
   unique (player_id)
 );

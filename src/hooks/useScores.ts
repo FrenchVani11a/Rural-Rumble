@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import { Score } from "@/lib/types";
-import { calculateNetScore } from "@/lib/scoring";
+import { Score, HoleScore } from "@/lib/types";
+import { calculateFromHoleScores } from "@/lib/scoring";
 
 export function useScores() {
   const [scores, setScores] = useState<Score[]>([]);
@@ -25,16 +25,22 @@ export function useScores() {
 
   const upsertScore = async (
     playerId: string,
-    grossScore: number,
+    holeScores: HoleScore[],
     handicap: number
   ) => {
-    const netScore = calculateNetScore(grossScore, handicap);
+    const { grossTotal, netTotal, holesPlayed, parPlayed } = calculateFromHoleScores(
+      holeScores,
+      handicap
+    );
 
     const { error } = await supabase.from("scores").upsert(
       {
         player_id: playerId,
-        gross_score: grossScore,
-        net_score: netScore,
+        gross_score: grossTotal,
+        net_score: netTotal,
+        hole_scores: holeScores,
+        holes_played: holesPlayed,
+        par_played: parPlayed,
       },
       { onConflict: "player_id" }
     );

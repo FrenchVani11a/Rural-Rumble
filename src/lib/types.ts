@@ -6,11 +6,19 @@ export interface Player {
   created_at: string;
 }
 
+export interface HoleScore {
+  hole: number;
+  gross: number;
+}
+
 export interface Score {
   id: string;
   player_id: string;
   gross_score: number;
   net_score: number;
+  hole_scores: HoleScore[];
+  holes_played: number;
+  par_played: number;
   created_at: string;
 }
 

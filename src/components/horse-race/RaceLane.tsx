@@ -70,12 +70,15 @@ export function RaceLane({ entry, isLeader }: RaceLaneProps) {
         </div>
         {score ? (
           <div className="text-white/70 text-xs md:text-sm">
-            Net {score.net_score} ({score.gross_score} - {player.handicap})
+            Net {score.net_score}
             <span className="ml-1 text-white/50">
-              {score.net_score - COURSE.par > 0 ? "+" : ""}
-              {score.net_score - COURSE.par === 0
+              {score.net_score - (score.par_played || COURSE.par) > 0 ? "+" : ""}
+              {score.net_score - (score.par_played || COURSE.par) === 0
                 ? "E"
-                : score.net_score - COURSE.par}
+                : score.net_score - (score.par_played || COURSE.par)}
+            </span>
+            <span className="ml-1 text-white/30">
+              (Thru {score.holes_played ?? 18})
             </span>
           </div>
         ) : (
