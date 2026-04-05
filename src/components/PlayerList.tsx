@@ -40,7 +40,7 @@ export function PlayerList({ players, onEdit, onDelete }: PlayerListProps) {
             <div className="text-white font-medium truncate">{player.name}</div>
             <div className="text-white/50 text-sm">Handicap: {player.handicap}</div>
           </div>
-          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
             <button
               onClick={() => onEdit(player)}
               className="px-3 py-1.5 rounded-lg bg-white/10 text-white/70 hover:bg-white/20 text-sm transition-colors"
