@@ -22,6 +22,13 @@ export interface Score {
   created_at: string;
 }
 
+export interface ChatMessage {
+  id: string;
+  author_name: string;
+  message: string;
+  created_at: string;
+}
+
 export interface LeaderboardEntry {
   player: Player;
   score: Score | null;

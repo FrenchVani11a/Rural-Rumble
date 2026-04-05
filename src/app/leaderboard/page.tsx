@@ -1,19 +1,26 @@
 "use client";
 
+import { useState } from "react";
 import { NavBar } from "@/components/NavBar";
 import { RaceTrack } from "@/components/horse-race/RaceTrack";
+import { RaceReplay } from "@/components/RaceReplay";
+import { Awards } from "@/components/Awards";
+import { ChatBoard } from "@/components/ChatBoard";
 import { useRealtimeLeaderboard } from "@/hooks/useRealtimeLeaderboard";
 import { useConfetti } from "@/hooks/useConfetti";
 import { COURSE } from "@/lib/constants";
 
 export default function LeaderboardPage() {
-  const { leaderboard, loading } = useRealtimeLeaderboard();
+  const { leaderboard, loading, players, scores } = useRealtimeLeaderboard();
+  const [replayMode, setReplayMode] = useState(false);
 
   const leaderId =
     leaderboard.length > 0 && leaderboard[0].score
       ? leaderboard[0].player.id
       : null;
   useConfetti(leaderId);
+
+  const hasScores = leaderboard.some((e) => e.score);
 
   return (
     <>
@@ -30,6 +37,14 @@ export default function LeaderboardPage() {
           <p className="text-white/50 text-sm">
             {COURSE.name} &middot; Par {COURSE.par} &middot; Live positions
           </p>
+          {hasScores && !replayMode && (
+            <button
+              onClick={() => setReplayMode(true)}
+              className="mt-3 px-4 py-2 rounded-lg bg-white/10 border border-white/10 text-white/70 text-sm hover:bg-white/20 transition-colors"
+            >
+              🎬 Watch Replay
+            </button>
+          )}
         </div>
 
         {loading ? (
@@ -40,10 +55,19 @@ export default function LeaderboardPage() {
           </div>
         ) : (
           <>
-            <RaceTrack entries={leaderboard} />
+            {/* Race track or replay */}
+            {replayMode ? (
+              <RaceReplay
+                players={players}
+                scores={scores}
+                onExit={() => setReplayMode(false)}
+              />
+            ) : (
+              <RaceTrack entries={leaderboard} />
+            )}
 
-            {/* Table view below the race */}
-            {leaderboard.some((e) => e.score) && (
+            {/* Score table */}
+            {hasScores && (
               <div className="mt-8 rounded-2xl overflow-hidden bg-white/5 border border-white/10">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[500px]">
@@ -60,7 +84,8 @@ export default function LeaderboardPage() {
                     <tbody>
                       {leaderboard.map((entry) => {
                         const toPar = entry.score
-                          ? entry.score.net_score - (entry.score.par_played || COURSE.par)
+                          ? entry.score.net_score -
+                            (entry.score.par_played || COURSE.par)
                           : null;
                         return (
                           <tr
@@ -142,6 +167,12 @@ export default function LeaderboardPage() {
                 </div>
               </div>
             )}
+
+            {/* Awards & Side Bets */}
+            <Awards players={players} scores={scores} />
+
+            {/* Trash Talk */}
+            <ChatBoard />
           </>
         )}
       </main>

@@ -1,7 +1,9 @@
 "use client";
 
+import { useRef, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { GolfCart } from "./GolfCart";
+import { DustTrail } from "./DustTrail";
 import { LeaderboardEntry } from "@/lib/types";
 import { COURSE } from "@/lib/constants";
 
@@ -21,6 +23,36 @@ function getInitials(name: string): string {
 
 export function RaceLane({ entry, isLeader }: RaceLaneProps) {
   const { player, score, rank, racePosition } = entry;
+
+  // Dust trail: track previous position
+  const prevPosition = useRef(racePosition);
+  const [dustIntensity, setDustIntensity] = useState(0);
+
+  useEffect(() => {
+    const delta = Math.abs(racePosition - prevPosition.current);
+    setDustIntensity(Math.min(delta / 20, 1));
+    prevPosition.current = racePosition;
+  }, [racePosition]);
+
+  // Spin-out: track previous rank
+  const prevRank = useRef(rank);
+  const [isSpinningOut, setIsSpinningOut] = useState(false);
+  const spinTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    if (score && rank > prevRank.current) {
+      setIsSpinningOut(true);
+      spinTimeout.current = setTimeout(() => setIsSpinningOut(false), 800);
+    }
+    prevRank.current = rank;
+    return () => {
+      if (spinTimeout.current) clearTimeout(spinTimeout.current);
+    };
+  }, [rank, score]);
+
+  const toPar = score
+    ? score.net_score - (score.par_played || COURSE.par)
+    : null;
 
   return (
     <div
@@ -56,11 +88,28 @@ export function RaceLane({ entry, isLeader }: RaceLaneProps) {
           mass: 1.5,
         }}
       >
-        <GolfCart
-          color={player.avatar_color}
-          initials={getInitials(player.name)}
-          size={40}
-        />
+        {/* Dust trail */}
+        <DustTrail intensity={dustIntensity} />
+
+        {/* Cart with optional spin-out */}
+        <motion.div
+          animate={
+            isSpinningOut
+              ? { rotate: [0, -15, 22, -8, 4, 0], y: [0, -4, 2, -1, 0] }
+              : { rotate: 0, y: 0 }
+          }
+          transition={
+            isSpinningOut
+              ? { duration: 0.7, ease: "easeOut" }
+              : { duration: 0.3 }
+          }
+        >
+          <GolfCart
+            color={player.avatar_color}
+            initials={getInitials(player.name)}
+            size={40}
+          />
+        </motion.div>
       </motion.div>
 
       {/* Player info (right side) */}
@@ -72,10 +121,8 @@ export function RaceLane({ entry, isLeader }: RaceLaneProps) {
           <div className="text-white/70 text-xs md:text-sm">
             Net {score.net_score}
             <span className="ml-1 text-white/50">
-              {score.net_score - (score.par_played || COURSE.par) > 0 ? "+" : ""}
-              {score.net_score - (score.par_played || COURSE.par) === 0
-                ? "E"
-                : score.net_score - (score.par_played || COURSE.par)}
+              {toPar! > 0 ? "+" : ""}
+              {toPar === 0 ? "E" : toPar}
             </span>
             <span className="ml-1 text-white/30">
               (Thru {score.holes_played ?? 18})

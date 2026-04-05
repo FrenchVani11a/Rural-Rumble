@@ -7,6 +7,8 @@ import { buildLeaderboard } from "@/lib/scoring";
 
 export function useRealtimeLeaderboard() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [scores, setScores] = useState<Score[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchAll = useCallback(async () => {
@@ -15,10 +17,12 @@ export function useRealtimeLeaderboard() {
       supabase.from("scores").select("*"),
     ]);
 
-    const players: Player[] = playersRes.data ?? [];
-    const scores: Score[] = scoresRes.data ?? [];
+    const p: Player[] = playersRes.data ?? [];
+    const s: Score[] = scoresRes.data ?? [];
 
-    setLeaderboard(buildLeaderboard(players, scores));
+    setPlayers(p);
+    setScores(s);
+    setLeaderboard(buildLeaderboard(p, s));
     setLoading(false);
   }, []);
 
@@ -44,5 +48,5 @@ export function useRealtimeLeaderboard() {
     };
   }, [fetchAll]);
 
-  return { leaderboard, loading, refetch: fetchAll };
+  return { leaderboard, loading, refetch: fetchAll, players, scores };
 }

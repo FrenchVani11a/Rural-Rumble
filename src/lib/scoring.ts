@@ -102,3 +102,195 @@ export function buildLeaderboard(
 
   return [...withScores, ...withoutScores];
 }
+
+// ─── Award Computations ─────────────────────────────────────
+
+export interface AwardResult {
+  playerName: string;
+  value: string;
+  detail: string;
+}
+
+function playerName(players: Player[], id: string): string {
+  return players.find((p) => p.id === id)?.name ?? "Unknown";
+}
+
+function playerHandicap(players: Player[], id: string): number {
+  return players.find((p) => p.id === id)?.handicap ?? 0;
+}
+
+/** The Hahei Horror — worst single hole (gross over par) */
+export function computeHaheiHorror(players: Player[], scores: Score[]): AwardResult | null {
+  let worst: { name: string; hole: number; gross: number; par: number; over: number } | null = null;
+
+  for (const score of scores) {
+    const name = playerName(players, score.player_id);
+    for (const hs of score.hole_scores) {
+      const par = HOLES[hs.hole - 1].par;
+      const over = hs.gross - par;
+      if (!worst || over > worst.over) {
+        worst = { name, hole: hs.hole, gross: hs.gross, par, over };
+      }
+    }
+  }
+
+  if (!worst || worst.over <= 0) return null;
+  return {
+    playerName: worst.name,
+    value: `+${worst.over}`,
+    detail: `${worst.gross} on hole ${worst.hole} (par ${worst.par})`,
+  };
+}
+
+/** Best Par 3 — lowest net total on par 3 holes */
+export function computeBestPar3(players: Player[], scores: Score[]): AwardResult | null {
+  const par3Holes = new Set(HOLES.filter((h) => h.par === 3).map((h) => h.hole));
+  let best: { name: string; totalNet: number; count: number } | null = null;
+
+  for (const score of scores) {
+    const hc = playerHandicap(players, score.player_id);
+    const par3Scores = score.hole_scores.filter((hs) => par3Holes.has(hs.hole));
+    if (par3Scores.length < 2) continue;
+
+    let totalNet = 0;
+    for (const hs of par3Scores) {
+      const hi = HOLES[hs.hole - 1];
+      totalNet += calculateHoleNet(hs.gross, hc, hi.strokeIndex);
+    }
+
+    if (!best || totalNet < best.totalNet) {
+      best = { name: playerName(players, score.player_id), totalNet, count: par3Scores.length };
+    }
+  }
+
+  if (!best) return null;
+  return {
+    playerName: best.name,
+    value: `Net ${best.totalNet}`,
+    detail: `Across ${best.count} par 3s`,
+  };
+}
+
+/** Back 9 Bandit — best net on holes 10-18 */
+export function computeBack9Bandit(players: Player[], scores: Score[]): AwardResult | null {
+  let best: { name: string; net: number; count: number } | null = null;
+
+  for (const score of scores) {
+    const hc = playerHandicap(players, score.player_id);
+    const back9 = score.hole_scores.filter((hs) => hs.hole >= 10);
+    if (back9.length < 3) continue;
+
+    let net = 0;
+    for (const hs of back9) {
+      const hi = HOLES[hs.hole - 1];
+      net += calculateHoleNet(hs.gross, hc, hi.strokeIndex);
+    }
+
+    if (!best || net < best.net) {
+      best = { name: playerName(players, score.player_id), net, count: back9.length };
+    }
+  }
+
+  if (!best) return null;
+  return {
+    playerName: best.name,
+    value: `Net ${best.net}`,
+    detail: `${best.count} back 9 holes`,
+  };
+}
+
+/** Birdie King — most holes with net under par */
+export function computeBirdieKing(players: Player[], scores: Score[]): AwardResult | null {
+  let best: { name: string; count: number } | null = null;
+
+  for (const score of scores) {
+    const hc = playerHandicap(players, score.player_id);
+    let count = 0;
+    for (const hs of score.hole_scores) {
+      const hi = HOLES[hs.hole - 1];
+      if (calculateHoleNet(hs.gross, hc, hi.strokeIndex) < hi.par) count++;
+    }
+
+    if (count > 0 && (!best || count > best.count)) {
+      best = { name: playerName(players, score.player_id), count };
+    }
+  }
+
+  if (!best) return null;
+  return {
+    playerName: best.name,
+    value: `${best.count}`,
+    detail: `birdie${best.count !== 1 ? "s" : ""} or better`,
+  };
+}
+
+/** Bogey Train — longest streak of consecutive bogey+ holes */
+export function computeBogeyTrain(players: Player[], scores: Score[]): AwardResult | null {
+  let worst: { name: string; streak: number; start: number; end: number } | null = null;
+
+  for (const score of scores) {
+    const hc = playerHandicap(players, score.player_id);
+    const sorted = [...score.hole_scores].sort((a, b) => a.hole - b.hole);
+
+    let streak = 0;
+    let streakStart = 0;
+
+    for (let i = 0; i < sorted.length; i++) {
+      const hs = sorted[i];
+      const hi = HOLES[hs.hole - 1];
+      const net = calculateHoleNet(hs.gross, hc, hi.strokeIndex);
+      const isConsecutive = i === 0 || sorted[i].hole === sorted[i - 1].hole + 1;
+
+      if (net > hi.par && isConsecutive) {
+        if (streak === 0) streakStart = hs.hole;
+        streak++;
+      } else if (net > hi.par) {
+        streak = 1;
+        streakStart = hs.hole;
+      } else {
+        streak = 0;
+      }
+
+      if (streak >= 2 && (!worst || streak > worst.streak)) {
+        worst = {
+          name: playerName(players, score.player_id),
+          streak,
+          start: streakStart,
+          end: hs.hole,
+        };
+      }
+    }
+  }
+
+  if (!worst) return null;
+  return {
+    playerName: worst.name,
+    value: `${worst.streak} in a row`,
+    detail: `Holes ${worst.start}-${worst.end}`,
+  };
+}
+
+/** Steady Eddie — most holes with net equal to par */
+export function computeSteadyEddie(players: Player[], scores: Score[]): AwardResult | null {
+  let best: { name: string; count: number } | null = null;
+
+  for (const score of scores) {
+    const hc = playerHandicap(players, score.player_id);
+    let count = 0;
+    for (const hs of score.hole_scores) {
+      const hi = HOLES[hs.hole - 1];
+      if (calculateHoleNet(hs.gross, hc, hi.strokeIndex) === hi.par) count++;
+    }
+
+    if (count > 0 && (!best || count > best.count)) {
+      best = { name: playerName(players, score.player_id), count };
+    }
+  }
+
+  if (!best) return null;
+  return {
+    playerName: best.name,
+    value: `${best.count}`,
+    detail: `par${best.count !== 1 ? "s" : ""}`,
+  };
+}

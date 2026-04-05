@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Trophy } from "@/components/Trophy";
 import { NavBar } from "@/components/NavBar";
+import { WeatherWidget } from "@/components/WeatherWidget";
 import { COURSE } from "@/lib/constants";
 
 export default function Home() {
@@ -31,6 +32,7 @@ export default function Home() {
             <span>&middot;</span>
             <span>{COURSE.holes} holes</span>
           </div>
+          <WeatherWidget />
         </div>
 
         {/* Action buttons */}
