@@ -9,6 +9,7 @@ interface ScorecardProps {
   player: Player;
   existingScore: Score | null;
   onSave: (playerId: string, holeScores: HoleScore[], handicap: number) => Promise<boolean>;
+  onReset?: (playerId: string) => Promise<boolean>;
 }
 
 function scoreCellColor(gross: number, par: number): string {
@@ -20,13 +21,15 @@ function scoreCellColor(gross: number, par: number): string {
   return "bg-red-600/40 text-red-200"; // double+
 }
 
-export function Scorecard({ player, existingScore, onSave }: ScorecardProps) {
+export function Scorecard({ player, existingScore, onSave, onReset }: ScorecardProps) {
   const [holeScores, setHoleScores] = useState<Map<number, number>>(new Map());
   const [editingHole, setEditingHole] = useState<number | null>(null);
   const [inputValue, setInputValue] = useState("");
   const [saving, setSaving] = useState(false);
+  const [confirmingReset, setConfirmingReset] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const saveTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Load existing scores
   useEffect(() => {
@@ -305,6 +308,47 @@ export function Scorecard({ player, existingScore, onSave }: ScorecardProps) {
             <div className="text-white/40 text-[10px] uppercase">Thru</div>
             <div className="text-white font-bold text-lg">{holesPlayed}</div>
           </div>
+        </div>
+      )}
+
+      {/* Reset scores button */}
+      {onReset && holesPlayed > 0 && (
+        <div className="mt-4 pt-4 border-t border-white/5">
+          {confirmingReset ? (
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-red-400 text-sm">Clear all scores for {player.name}?</span>
+              <button
+                onClick={async () => {
+                  setConfirmingReset(false);
+                  if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+                  await onReset(player.id);
+                  setHoleScores(new Map());
+                }}
+                className="px-4 py-1.5 rounded-lg bg-red-500 text-white font-bold text-sm hover:bg-red-600 transition-colors"
+              >
+                Yes, reset
+              </button>
+              <button
+                onClick={() => {
+                  setConfirmingReset(false);
+                  if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+                }}
+                className="px-3 py-1.5 rounded-lg bg-white/10 text-white/70 text-sm hover:bg-white/20 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => {
+                setConfirmingReset(true);
+                resetTimerRef.current = setTimeout(() => setConfirmingReset(false), 5000);
+              }}
+              className="w-full py-2 rounded-lg bg-white/5 text-white/30 text-sm hover:bg-white/10 hover:text-white/50 transition-colors"
+            >
+              Reset Scores
+            </button>
+          )}
         </div>
       )}
     </div>

@@ -49,5 +49,15 @@ export function useScores() {
     return !error;
   };
 
-  return { scores, loading, upsertScore, refetch: fetchScores };
+  const resetScore = async (playerId: string) => {
+    const { error } = await supabase
+      .from("scores")
+      .delete()
+      .eq("player_id", playerId);
+
+    if (!error) await fetchScores();
+    return !error;
+  };
+
+  return { scores, loading, upsertScore, resetScore, refetch: fetchScores };
 }
