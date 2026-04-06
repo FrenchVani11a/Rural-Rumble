@@ -1,9 +1,28 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { Player, Score, HoleScore } from "@/lib/types";
 import { HOLES, FRONT_NINE, BACK_NINE, COURSE, HoleInfo } from "@/lib/constants";
 import { getStrokesForHole, calculateFromHoleScores } from "@/lib/scoring";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
+
+interface ScoreReaction {
+  id: number;
+  emoji: string;
+  x: number;
+  y: number;
+}
+
+function getReactionEmoji(gross: number, par: number): string {
+  const diff = gross - par;
+  if (diff <= -2) return ["🦅", "🤯", "👑", "🔥"][Math.floor(Math.random() * 4)];
+  if (diff === -1) return ["🐦", "💪", "😎", "👏"][Math.floor(Math.random() * 4)];
+  if (diff === 0) return ["👍", "✅", "😌", "🤝"][Math.floor(Math.random() * 4)];
+  if (diff === 1) return ["😬", "💨", "🫣", "😅"][Math.floor(Math.random() * 4)];
+  if (diff === 2) return ["💩", "😭", "🤮", "📉"][Math.floor(Math.random() * 4)];
+  return ["💀", "🪦", "🚑", "🏳️", "😵‍💫", "🤡"][Math.floor(Math.random() * 6)];
+}
 
 interface ScorecardProps {
   player: Player;
@@ -27,6 +46,9 @@ export function Scorecard({ player, existingScore, onSave, onReset }: ScorecardP
   const [inputValue, setInputValue] = useState("");
   const [saving, setSaving] = useState(false);
   const [confirmingReset, setConfirmingReset] = useState(false);
+  const [reactions, setReactions] = useState<ScoreReaction[]>([]);
+  const reactionIdRef = useRef(0);
+  const { playSoundForScore } = useSoundEffects();
   const inputRef = useRef<HTMLInputElement>(null);
   const saveTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
   const resetTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -81,6 +103,16 @@ export function Scorecard({ player, existingScore, onSave, onReset }: ScorecardP
     const val = parseInt(inputValue);
     if (!isNaN(val) && val >= 1 && val <= 15) {
       setScore(editingHole, val);
+      // Play sound + show reaction based on score vs par
+      const holePar = HOLES[editingHole - 1].par;
+      playSoundForScore(val, holePar);
+      const id = ++reactionIdRef.current;
+      const emoji = getReactionEmoji(val, holePar);
+      setReactions((prev) => [
+        ...prev,
+        { id, emoji, x: 30 + Math.random() * 40, y: 20 + Math.random() * 20 },
+      ]);
+      setTimeout(() => setReactions((prev) => prev.filter((r) => r.id !== id)), 1500);
       // Auto-advance to next hole
       if (editingHole < 18) {
         const next = editingHole + 1;
@@ -244,7 +276,24 @@ export function Scorecard({ player, existingScore, onSave, onReset }: ScorecardP
   const toPar = holesPlayed > 0 ? netTotal - parPlayed : null;
 
   return (
-    <div>
+    <div className="relative">
+      {/* Floating emoji reactions */}
+      <AnimatePresence>
+        {reactions.map((r) => (
+          <motion.div
+            key={r.id}
+            initial={{ opacity: 1, scale: 0.5, y: 0 }}
+            animate={{ opacity: 0, scale: 2.5, y: -120, rotate: Math.random() * 40 - 20 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.4, ease: "easeOut" }}
+            className="absolute z-50 text-4xl pointer-events-none"
+            style={{ left: `${r.x}%`, top: `${r.y}%` }}
+          >
+            {r.emoji}
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
       {/* Player header */}
       <div className="flex items-center gap-3 mb-4">
         <div
