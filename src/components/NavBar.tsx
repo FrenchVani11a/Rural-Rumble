@@ -6,9 +6,10 @@ import { usePathname } from "next/navigation";
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: "🏠" },
   { href: "/leaderboard", label: "Race", icon: "🏁" },
-  { href: "/course-map", label: "Map", icon: "🗺️" },
-  { href: "/players", label: "Players", icon: "⛳" },
   { href: "/scores", label: "Scores", icon: "📝" },
+  { href: "/players", label: "Players", icon: "⛳" },
+  { href: "/chat", label: "Chat", icon: "💬" },
+  { href: "/photos", label: "Photos", icon: "📸" },
 ];
 
 export function NavBar() {
@@ -21,6 +22,7 @@ export function NavBar() {
         <Link
           href="/"
           className="font-display text-xl text-yellow-400 mr-8 tracking-wide"
+          style={{ fontFamily: "var(--font-bungee)" }}
         >
           Rural Rumble
         </Link>
@@ -39,14 +41,14 @@ export function NavBar() {
         ))}
       </nav>
 
-      {/* Mobile top nav */}
+      {/* Mobile top bar */}
       <nav className="md:hidden sticky top-0 z-50 bg-green-900/95 backdrop-blur-sm border-b border-green-700">
-        <div className="flex items-center justify-around px-2 py-1.5">
+        <div className="flex gap-1 overflow-x-auto px-2 py-1.5 scrollbar-hide">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors min-w-[60px] justify-center ${
+              className={`flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors shrink-0 ${
                 pathname === item.href
                   ? "bg-yellow-400/20 text-yellow-400"
                   : "text-white/60 active:bg-white/10"

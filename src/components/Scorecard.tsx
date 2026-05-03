@@ -6,6 +6,7 @@ import { Player, Score, HoleScore } from "@/lib/types";
 import { HOLES, FRONT_NINE, BACK_NINE, COURSE, COURSES, HoleInfo } from "@/lib/constants";
 import { getStrokesForHole, calculateFromHoleScores } from "@/lib/scoring";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
+import { useCanCounts } from "@/hooks/useCanCounts";
 
 interface ScoreReaction {
   id: number;
@@ -47,8 +48,8 @@ export function Scorecard({ player, existingScore, courseId = "waverley", onSave
   const activeHoles = isWhanganui ? FRONT_NINE : HOLES;
   const maxHole = isWhanganui ? 9 : 18;
 
+  const { countsForPlayer, setCount: saveCanCount } = useCanCounts();
   const [holeScores, setHoleScores] = useState<Map<number, number>>(new Map());
-  const [cans, setCans] = useState<Map<number, number>>(new Map());
   const [editingHole, setEditingHole] = useState<number | null>(null);
   const [inputValue, setInputValue] = useState("");
   const [saving, setSaving] = useState(false);
@@ -356,20 +357,21 @@ export function Scorecard({ player, existingScore, courseId = "waverley", onSave
           <div className="text-white/50 text-xs uppercase tracking-wider mb-2 px-1">🍺 Can Count</div>
           <div className="flex gap-2 flex-wrap">
             {FRONT_NINE.map((h) => {
-              const count = cans.get(h.hole) ?? 0;
+              const dbCount = countsForPlayer(player.id).find((c) => c.hole === h.hole);
+              const count = dbCount?.count ?? 0;
               return (
                 <div key={h.hole} className="flex flex-col items-center gap-1">
                   <div className="text-white/30 text-[10px]">H{h.hole}</div>
                   <div className="flex gap-1">
                     <button
-                      onClick={() => setCans((prev) => { const m = new Map(prev); m.set(h.hole, Math.max(0, (m.get(h.hole) ?? 0) - 1)); return m; })}
+                      onClick={() => saveCanCount(player.id, h.hole, Math.max(0, count - 1))}
                       className="w-6 h-6 rounded bg-white/10 text-white/50 text-xs hover:bg-white/20"
                     >-</button>
                     <div className="w-6 h-6 rounded bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold flex items-center justify-center">
                       {count}
                     </div>
                     <button
-                      onClick={() => setCans((prev) => { const m = new Map(prev); m.set(h.hole, (m.get(h.hole) ?? 0) + 1); return m; })}
+                      onClick={() => saveCanCount(player.id, h.hole, count + 1)}
                       className="w-6 h-6 rounded bg-white/10 text-white/50 text-xs hover:bg-white/20"
                     >+</button>
                   </div>
@@ -378,7 +380,7 @@ export function Scorecard({ player, existingScore, courseId = "waverley", onSave
             })}
           </div>
           <div className="mt-2 text-white/30 text-xs">
-            Total cans: {Array.from(cans.values()).reduce((a, b) => a + b, 0)} &middot; Mulligans earned: {Array.from(cans.values()).filter((c) => c > 1).reduce((a, b) => a + (b - 1), 0)}
+            Total cans: {countsForPlayer(player.id).reduce((a, c) => a + c.count, 0)} &middot; Mulligans earned: {countsForPlayer(player.id).filter((c) => c.count > 1).reduce((a, c) => a + (c.count - 1), 0)}
           </div>
         </div>
       )}
