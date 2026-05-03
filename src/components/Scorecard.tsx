@@ -106,10 +106,16 @@ export function Scorecard({ player, existingScore, courseId = "waverley", onSave
     setInputValue(holeScores.get(hole)?.toString() ?? "");
   };
 
+  const isSimon = player.name === "Simon Reeves";
+
   const commitEdit = () => {
     if (editingHole === null) return;
     const val = parseInt(inputValue);
     if (!isNaN(val) && val >= 1 && val <= 15) {
+      if (isSimon && !window.confirm(`Simon, are you sure you got ${val} on hole ${editingHole}? Really?`)) {
+        setEditingHole(null);
+        return;
+      }
       setScore(editingHole, val);
       // Play sound + show reaction based on score vs par
       const holePar = HOLES[editingHole - 1].par;
