@@ -37,6 +37,13 @@ export function usePunishments() {
     await fetch();
   };
 
+  const removePunishment = async (playerId: string, punishmentId: string) => {
+    const latest = logs.find((l) => l.player_id === playerId && l.punishment_id === punishmentId);
+    if (!latest) return;
+    await supabase.from("punishments").delete().eq("id", latest.id);
+    await fetch();
+  };
+
   const countByPlayer = (players: Player[]) => {
     return players.map((p) => ({
       player: p,
@@ -50,5 +57,5 @@ export function usePunishments() {
     }));
   };
 
-  return { logs, addPunishment, countByPlayer };
+  return { logs, addPunishment, removePunishment, countByPlayer };
 }

@@ -4,16 +4,29 @@ import { Player } from "@/lib/types";
 import { PUNISHMENTS } from "@/lib/constants";
 import { usePunishments } from "@/hooks/usePunishments";
 
+const REMOVE_PASSWORD = "nogimmies";
+
 interface Props {
   players: Player[];
   courseId?: string;
 }
 
 export function PunishmentTracker({ players, courseId = "general" }: Props) {
-  const { addPunishment, countByPlayer } = usePunishments();
+  const { addPunishment, removePunishment, countByPlayer } = usePunishments();
   const counts = countByPlayer(players);
 
   if (players.length === 0) return null;
+
+  const handleRemove = (playerId: string, punishmentId: string, playerName: string, count: number) => {
+    if (count === 0) return;
+    const pw = window.prompt(`Password required to remove a punishment from ${playerName}:`);
+    if (pw === null) return;
+    if (pw !== REMOVE_PASSWORD) {
+      window.alert("Wrong password. Nice try. 🚫");
+      return;
+    }
+    removePunishment(playerId, punishmentId);
+  };
 
   return (
     <div className="mt-8 rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
@@ -45,17 +58,28 @@ export function PunishmentTracker({ players, courseId = "general" }: Props) {
             <span className="text-white/70 text-xs font-medium">{p.title}</span>
           </div>
           <div className="grid" style={{ gridTemplateColumns: `repeat(${players.length}, 1fr)` }}>
-            {counts.map(({ player, byType }) => (
-              <div key={player.id} className="py-2 text-center border-r border-white/5 last:border-r-0">
-                <div className="text-white/60 text-sm font-bold mb-1">{byType[p.id] ?? 0}</div>
-                <button
-                  onClick={() => addPunishment(player.id, p.id, courseId)}
-                  className="text-[10px] px-2 py-1 rounded bg-white/10 text-white/40 hover:bg-white/20 hover:text-white/70 transition-colors"
-                >
-                  +1
-                </button>
-              </div>
-            ))}
+            {counts.map(({ player, byType }) => {
+              const count = byType[p.id] ?? 0;
+              return (
+                <div key={player.id} className="py-2 text-center border-r border-white/5 last:border-r-0">
+                  <div className="text-white/60 text-sm font-bold mb-1">{count}</div>
+                  <div className="flex items-center justify-center gap-1">
+                    <button
+                      onClick={() => handleRemove(player.id, p.id, player.name.split(" ")[0], count)}
+                      className="text-[10px] px-2 py-1 rounded bg-white/10 text-white/40 hover:bg-red-500/20 hover:text-red-400 transition-colors"
+                    >
+                      -1
+                    </button>
+                    <button
+                      onClick={() => addPunishment(player.id, p.id, courseId)}
+                      className="text-[10px] px-2 py-1 rounded bg-white/10 text-white/40 hover:bg-white/20 hover:text-white/70 transition-colors"
+                    >
+                      +1
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       ))}
