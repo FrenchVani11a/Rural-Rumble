@@ -85,13 +85,41 @@ export const TEAMS = [
     emoji: "⚔️",
   },
   {
-    id: "defenders",
-    name: "The Defenders",
+    id: "the-boys",
+    name: "The Boys 🌈",
     players: ["Simon Reeves", "Dinesh Fonseka"],
-    color: "#457B9D",
-    emoji: "🛡️",
+    color: "#FF69B4",
+    emoji: "🏳️‍🌈",
   },
 ] as const;
+
+export const PUNISHMENTS = [
+  {
+    id: "ladies-tee",
+    emoji: "👙",
+    title: "Ladies Tee",
+    rule: "Fail to hit past the ladies tee and it's pants off — jocks only for the rest of the hole.",
+  },
+  {
+    id: "three-putt",
+    emoji: "🏊",
+    title: "Three Putt Cap",
+    rule: "Last player to three-putt wears the swimming cap. Whoever is still wearing it at the end has to skull a full beer from it.",
+  },
+  {
+    id: "gimmie",
+    emoji: "🤚",
+    title: "Gimmie Range",
+    rule: "Gimmies are Simon's hand only. Nothing can be given if it's for a three-putt — it must be holed out.",
+  },
+] as const;
+
+export const CAMPERVAN = {
+  name: "The Big Boy Caravan",
+  url: "https://indiecampers.com/discover/en-us/rvs/oc-family-plus",
+  description: "Four grown men, one campervan, zero personal space. The OC Family Plus seats 5 and sleeps 4 — which means someone is spooning Dinesh whether they like it or not. Expect it to smell like old socks and regret by day two.",
+  emoji: "🚐",
+} as const;
 
 export const PLAYER_COLORS = [
   "#E63946", // red

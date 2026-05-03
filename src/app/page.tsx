@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Trophy } from "@/components/Trophy";
 import { NavBar } from "@/components/NavBar";
 import { WeatherWidget } from "@/components/WeatherWidget";
-import { Commissioner } from "@/components/Commissioner";
-import { COURSES, TEAMS } from "@/lib/constants";
+import { Punishments } from "@/components/Punishments";
+import { COURSES, TEAMS, CAMPERVAN } from "@/lib/constants";
 
 export default function Home() {
   return (
@@ -78,19 +78,18 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* The Commissioner */}
-        <div className="w-full max-w-md mb-8">
-          <Commissioner />
-        </div>
-
         {/* Teams */}
         <div className="w-full max-w-md mb-6">
           <h2 className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-3">The Teams</h2>
           <div className="grid grid-cols-2 gap-3">
             {TEAMS.map((team) => (
-              <div key={team.id} className="px-4 py-4 rounded-2xl bg-white/5 border border-white/10">
+              <div
+                key={team.id}
+                className="px-4 py-4 rounded-2xl bg-white/5 border border-white/10"
+                style={{ borderColor: `${team.color}30` }}
+              >
                 <div className="text-2xl mb-2">{team.emoji}</div>
-                <div className="text-white font-bold text-sm mb-1">{team.name}</div>
+                <div className="text-white font-bold text-sm mb-1" style={{ color: team.color }}>{team.name}</div>
                 {team.players.map((p) => (
                   <div key={p} className="text-white/50 text-xs">{p}</div>
                 ))}
@@ -100,23 +99,53 @@ export default function Home() {
         </div>
 
         {/* Courses */}
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md mb-8">
           <h2 className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-3">The Courses</h2>
           <div className="flex flex-col gap-3">
             {COURSES.map((course) => (
-              <div key={course.id} className="px-5 py-4 rounded-2xl bg-white/5 border border-white/10">
+              <a
+                key={course.id}
+                href={course.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-5 py-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+              >
                 <div className="flex items-center gap-3 mb-1">
                   <span className="text-xl">{course.emoji}</span>
                   <div>
                     <span className="text-white/30 text-xs font-semibold uppercase tracking-wider">Course {course.number}</span>
                     <div className="text-white font-bold text-sm">{course.name}</div>
                   </div>
+                  <span className="ml-auto text-white/20 text-xs">↗</span>
                 </div>
                 <div className="text-yellow-400/80 text-xs font-medium mb-1">{course.format}</div>
                 <p className="text-white/40 text-xs leading-relaxed">{course.description}</p>
-              </div>
+              </a>
             ))}
           </div>
+        </div>
+
+        {/* Punishments */}
+        <div className="w-full max-w-md mb-8">
+          <Punishments />
+        </div>
+
+        {/* Campervan */}
+        <div className="w-full max-w-md mb-8">
+          <h2 className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-3">🚐 Accommodation</h2>
+          <a
+            href={CAMPERVAN.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block px-5 py-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">{CAMPERVAN.emoji}</span>
+              <span className="text-white font-bold text-sm">{CAMPERVAN.name}</span>
+              <span className="ml-auto text-white/20 text-xs">↗</span>
+            </div>
+            <p className="text-white/50 text-xs leading-relaxed">{CAMPERVAN.description}</p>
+          </a>
         </div>
       </main>
     </>

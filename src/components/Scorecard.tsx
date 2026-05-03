@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Player, Score, HoleScore } from "@/lib/types";
-import { HOLES, FRONT_NINE, BACK_NINE, COURSE, HoleInfo } from "@/lib/constants";
+import { HOLES, FRONT_NINE, BACK_NINE, COURSE, COURSES, HoleInfo } from "@/lib/constants";
 import { getStrokesForHole, calculateFromHoleScores } from "@/lib/scoring";
 import { useSoundEffects } from "@/hooks/useSoundEffects";
 
@@ -27,6 +27,7 @@ function getReactionEmoji(gross: number, par: number): string {
 interface ScorecardProps {
   player: Player;
   existingScore: Score | null;
+  courseId?: string;
   onSave: (playerId: string, holeScores: HoleScore[], handicap: number) => Promise<boolean>;
   onReset?: (playerId: string) => Promise<boolean>;
 }
@@ -40,8 +41,14 @@ function scoreCellColor(gross: number, par: number): string {
   return "bg-red-600/40 text-red-200"; // double+
 }
 
-export function Scorecard({ player, existingScore, onSave, onReset }: ScorecardProps) {
+export function Scorecard({ player, existingScore, courseId = "waverley", onSave, onReset }: ScorecardProps) {
+  const courseInfo = COURSES.find((c) => c.id === courseId) ?? COURSES[0];
+  const isWhanganui = courseId === "whanganui";
+  const activeHoles = isWhanganui ? FRONT_NINE : HOLES;
+  const maxHole = isWhanganui ? 9 : 18;
+
   const [holeScores, setHoleScores] = useState<Map<number, number>>(new Map());
+  const [cans, setCans] = useState<Map<number, number>>(new Map());
   const [editingHole, setEditingHole] = useState<number | null>(null);
   const [inputValue, setInputValue] = useState("");
   const [saving, setSaving] = useState(false);
@@ -114,7 +121,7 @@ export function Scorecard({ player, existingScore, onSave, onReset }: ScorecardP
       ]);
       setTimeout(() => setReactions((prev) => prev.filter((r) => r.id !== id)), 1500);
       // Auto-advance to next hole
-      if (editingHole < 18) {
+      if (editingHole < maxHole) {
         const next = editingHole + 1;
         setEditingHole(next);
         setInputValue(holeScores.get(next)?.toString() ?? "");
@@ -330,9 +337,51 @@ export function Scorecard({ player, existingScore, onSave, onReset }: ScorecardP
         )}
       </div>
 
+      {/* Format badge */}
+      <div className="mb-4 px-3 py-2 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2">
+        <span className="text-lg">{courseInfo.emoji}</span>
+        <div>
+          <div className="text-white/80 text-xs font-bold">{courseInfo.name}</div>
+          <div className="text-yellow-400/70 text-[10px]">{courseInfo.format}</div>
+        </div>
+      </div>
+
       {/* Scorecard tables */}
-      {renderNine(FRONT_NINE, "Front 9", COURSE.frontNinePar, frontGross, frontHolesPlayed)}
-      {renderNine(BACK_NINE, "Back 9", COURSE.backNinePar, backGross, backHolesPlayed)}
+      {renderNine(FRONT_NINE, isWhanganui ? "9 Holes" : "Front 9", COURSE.frontNinePar, frontGross, frontHolesPlayed)}
+      {!isWhanganui && renderNine(BACK_NINE, "Back 9", COURSE.backNinePar, backGross, backHolesPlayed)}
+
+      {/* Can tracker for Whanganui */}
+      {isWhanganui && (
+        <div className="mb-6">
+          <div className="text-white/50 text-xs uppercase tracking-wider mb-2 px-1">🍺 Can Count</div>
+          <div className="flex gap-2 flex-wrap">
+            {FRONT_NINE.map((h) => {
+              const count = cans.get(h.hole) ?? 0;
+              return (
+                <div key={h.hole} className="flex flex-col items-center gap-1">
+                  <div className="text-white/30 text-[10px]">H{h.hole}</div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setCans((prev) => { const m = new Map(prev); m.set(h.hole, Math.max(0, (m.get(h.hole) ?? 0) - 1)); return m; })}
+                      className="w-6 h-6 rounded bg-white/10 text-white/50 text-xs hover:bg-white/20"
+                    >-</button>
+                    <div className="w-6 h-6 rounded bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold flex items-center justify-center">
+                      {count}
+                    </div>
+                    <button
+                      onClick={() => setCans((prev) => { const m = new Map(prev); m.set(h.hole, (m.get(h.hole) ?? 0) + 1); return m; })}
+                      className="w-6 h-6 rounded bg-white/10 text-white/50 text-xs hover:bg-white/20"
+                    >+</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-2 text-white/30 text-xs">
+            Total cans: {Array.from(cans.values()).reduce((a, b) => a + b, 0)} &middot; Mulligans earned: {Array.from(cans.values()).filter((c) => c > 1).reduce((a, b) => a + (b - 1), 0)}
+          </div>
+        </div>
+      )}
 
       {/* Totals summary */}
       {holesPlayed > 0 && (

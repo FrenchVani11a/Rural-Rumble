@@ -5,39 +5,43 @@ import { NavBar } from "@/components/NavBar";
 import { Scorecard } from "@/components/Scorecard";
 import { usePlayers } from "@/hooks/usePlayers";
 import { useScores } from "@/hooks/useScores";
-import { COURSE } from "@/lib/constants";
+import { COURSES } from "@/lib/constants";
 
-const STORAGE_KEY = "hahei-selected-player";
+const STORAGE_KEY_PLAYER = "rr-selected-player";
+const STORAGE_KEY_COURSE = "rr-selected-course";
 
 export default function ScoresPage() {
+  const [selectedCourseId, setSelectedCourseId] = useState<string>("waverley");
   const { players, loading: playersLoading } = usePlayers();
-  const { scores, loading: scoresLoading, upsertScore, resetScore } = useScores();
+  const { scores, loading: scoresLoading, upsertScore, resetScore } = useScores(selectedCourseId);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
   const selectorRef = useRef<HTMLDivElement>(null);
 
-  // Load saved player from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) setSelectedPlayerId(saved);
+    const savedPlayer = localStorage.getItem(STORAGE_KEY_PLAYER);
+    const savedCourse = localStorage.getItem(STORAGE_KEY_COURSE);
+    if (savedPlayer) setSelectedPlayerId(savedPlayer);
+    if (savedCourse) setSelectedCourseId(savedCourse);
     setInitialized(true);
   }, []);
 
-  // Save selection to localStorage
   const selectPlayer = (id: string) => {
     setSelectedPlayerId(id);
-    localStorage.setItem(STORAGE_KEY, id);
-
-    // Scroll the selected pill into view
+    localStorage.setItem(STORAGE_KEY_PLAYER, id);
     setTimeout(() => {
       const el = document.getElementById(`player-pill-${id}`);
       el?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
     }, 50);
   };
 
-  const loading = playersLoading || scoresLoading || !initialized;
+  const selectCourse = (id: string) => {
+    setSelectedCourseId(id);
+    localStorage.setItem(STORAGE_KEY_COURSE, id);
+  };
 
-  // Resolve active player: saved > first player
+  const loading = playersLoading || scoresLoading || !initialized;
+  const activeCourse = COURSES.find((c) => c.id === selectedCourseId) ?? COURSES[0];
   const savedValid = selectedPlayerId && players.some((p) => p.id === selectedPlayerId);
   const activePlayerId = savedValid ? selectedPlayerId : players[0]?.id ?? null;
   const activePlayer = players.find((p) => p.id === activePlayerId) ?? null;
@@ -87,9 +91,30 @@ export default function ScoresPage() {
             <span className="text-yellow-400">Enter</span>{" "}
             <span className="text-white">Scores</span>
           </h1>
-          <p className="text-white/50 text-sm">
-            {COURSE.name} &middot; Par {COURSE.par}
-          </p>
+        </div>
+
+        {/* Course selector */}
+        <div className="px-4 mb-4">
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {COURSES.map((course) => (
+              <button
+                key={course.id}
+                onClick={() => selectCourse(course.id)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl whitespace-nowrap shrink-0 transition-all text-sm font-medium ${
+                  selectedCourseId === course.id
+                    ? "bg-yellow-400/20 border border-yellow-400/50 text-yellow-400"
+                    : "bg-white/5 border border-white/10 text-white/60 hover:bg-white/10"
+                }`}
+              >
+                <span>{course.emoji}</span>
+                <div className="text-left">
+                  <div>{course.name}</div>
+                  <div className="text-[10px] text-white/40">{course.holes} holes</div>
+                </div>
+              </button>
+            ))}
+          </div>
+          <div className="mt-2 px-1 text-white/30 text-xs">{activeCourse.format}</div>
         </div>
 
         {/* Sticky player selector */}
@@ -122,9 +147,7 @@ export default function ScoresPage() {
                   <div className="text-left">
                     <div className="text-sm font-medium">{player.name}</div>
                     <div className="text-[10px] text-white/40">
-                      {playerScore
-                        ? `Thru ${playerScore.holes_played}`
-                        : "No scores"}
+                      {playerScore ? `Thru ${playerScore.holes_played}` : "No scores"}
                     </div>
                   </div>
                 </button>
@@ -133,14 +156,15 @@ export default function ScoresPage() {
           </div>
         </div>
 
-        {/* Scorecard for selected player */}
+        {/* Scorecard */}
         <div className="px-4 pb-6 md:pb-10">
           {activePlayer && (
             <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
               <Scorecard
-                key={activePlayer.id}
+                key={`${activePlayer.id}-${selectedCourseId}`}
                 player={activePlayer}
                 existingScore={activeScore}
+                courseId={selectedCourseId}
                 onSave={upsertScore}
                 onReset={resetScore}
               />

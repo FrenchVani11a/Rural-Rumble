@@ -14,6 +14,7 @@ export interface HoleScore {
 export interface Score {
   id: string;
   player_id: string;
+  course_id: string;
   gross_score: number;
   net_score: number;
   hole_scores: HoleScore[];

@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { Score, HoleScore } from "@/lib/types";
 import { calculateFromHoleScores } from "@/lib/scoring";
 
-export function useScores() {
+export function useScores(courseId: string = "waverley") {
   const [scores, setScores] = useState<Score[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -13,11 +13,12 @@ export function useScores() {
     const { data, error } = await supabase
       .from("scores")
       .select("*")
+      .eq("course_id", courseId)
       .order("created_at", { ascending: true });
 
     if (!error && data) setScores(data);
     setLoading(false);
-  }, []);
+  }, [courseId]);
 
   useEffect(() => {
     fetchScores();
@@ -36,13 +37,14 @@ export function useScores() {
     const { error } = await supabase.from("scores").upsert(
       {
         player_id: playerId,
+        course_id: courseId,
         gross_score: grossTotal,
         net_score: netTotal,
         hole_scores: holeScores,
         holes_played: holesPlayed,
         par_played: parPlayed,
       },
-      { onConflict: "player_id" }
+      { onConflict: "player_id,course_id" }
     );
 
     if (!error) await fetchScores();
@@ -53,7 +55,8 @@ export function useScores() {
     const { error } = await supabase
       .from("scores")
       .delete()
-      .eq("player_id", playerId);
+      .eq("player_id", playerId)
+      .eq("course_id", courseId);
 
     if (!error) await fetchScores();
     return !error;
