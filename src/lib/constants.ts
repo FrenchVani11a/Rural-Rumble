@@ -29,17 +29,69 @@ export const HOLES: HoleInfo[] = [
 export const FRONT_NINE = HOLES.slice(0, 9);
 export const BACK_NINE = HOLES.slice(9);
 
+export const COURSES = [
+  {
+    id: "waverley",
+    number: 1,
+    name: "Waverley Golf Course",
+    url: "https://www.waverleygolf.co.nz",
+    holes: 18,
+    format: "2v2 Match Play — Both Balls, Handicap Adjusted",
+    description:
+      "Full 18-hole match play. Both players' balls count on every hole with handicap strokes applied.",
+    emoji: "🏌️",
+  },
+  {
+    id: "whanganui",
+    number: 2,
+    name: "Whanganui Golf Club",
+    url: "https://www.wanganuigolfclub.co.nz",
+    holes: 9,
+    format: "9 Holes — Can Per Hole, Match Play Best Ball",
+    description:
+      "Off the stick match play. Each player must consume one can per hole. An extra can earns a mulligan.",
+    emoji: "🍺",
+  },
+  {
+    id: "rangatira",
+    number: 3,
+    name: "Rangatira Golf Course",
+    url: "https://www.rangatiragolf.co.nz",
+    holes: 18,
+    format: "Ambrose 2v2",
+    description:
+      "Both players hit, pick the best shot, and play from there. Pure team golf.",
+    emoji: "🤝",
+  },
+] as const;
+
 export const COURSE = {
-  id: "mercury-bay",
-  name: "Mercury Bay Golf Club",
+  id: "waverley",
+  name: "Waverley Golf Course",
   par: 71,
   holes: 18,
-  location: "Whitianga, Coromandel",
-  description:
-    "18-hole championship course established in 1932. Set in the stunning Coromandel Peninsula with views across Mercury Bay.",
+  location: "Waverley",
+  description: COURSES[0].description,
   frontNinePar: FRONT_NINE.reduce((sum, h) => sum + h.par, 0),
   backNinePar: BACK_NINE.reduce((sum, h) => sum + h.par, 0),
 } as const;
+
+export const TEAMS = [
+  {
+    id: "challengers",
+    name: "The Challengers",
+    players: ["Alex Beaven", "Walter Todd"],
+    color: "#E63946",
+    emoji: "⚔️",
+  },
+  {
+    id: "defenders",
+    name: "The Defenders",
+    players: ["Simon Reeves", "Dinesh Fonseka"],
+    color: "#457B9D",
+    emoji: "🛡️",
+  },
+] as const;
 
 export const PLAYER_COLORS = [
   "#E63946", // red

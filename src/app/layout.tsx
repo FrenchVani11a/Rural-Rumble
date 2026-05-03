@@ -14,9 +14,9 @@ const bungeeShade = Bungee_Shade({
 });
 
 export const metadata: Metadata = {
-  title: "The Hahei Classic",
+  title: "Rural Rumble",
   description:
-    "Golf competition leaderboard for the Hahei Classic at Mercury Bay Golf Club",
+    "Golf competition leaderboard for the Rural Rumble — three courses, two teams, one trophy.",
 };
 
 export const viewport: Viewport = {

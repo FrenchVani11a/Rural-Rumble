@@ -22,7 +22,7 @@ export function NavBar() {
           href="/"
           className="font-display text-xl text-yellow-400 mr-8 tracking-wide"
         >
-          The Hahei Classic
+          Rural Rumble
         </Link>
         {NAV_ITEMS.map((item) => (
           <Link
