@@ -82,6 +82,7 @@ export default function PhotosPage() {
               className="border-2 border-dashed border-white/20 rounded-xl p-6 text-center cursor-pointer hover:border-white/40 transition-colors"
             >
               {preview ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src={preview} alt="preview" className="max-h-40 mx-auto rounded-lg object-cover" />
               ) : (
                 <div className="text-white/40 text-sm">
@@ -112,6 +113,7 @@ export default function PhotosPage() {
           <div className="grid grid-cols-2 gap-3">
             {photos.map((photo) => (
               <div key={photo.id} className="rounded-2xl overflow-hidden bg-white/5 border border-white/10">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={photo.url}
                   alt={photo.caption ?? ""}
