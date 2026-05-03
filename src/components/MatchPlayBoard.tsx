@@ -12,7 +12,7 @@ interface Props {
 
 function getTeamPlayers(players: Player[], teamIndex: number) {
   const names = TEAMS[teamIndex].players;
-  return players.filter((p) => names.includes(p.name as typeof names[number]));
+  return players.filter((p) => (names as readonly string[]).includes(p.name));
 }
 
 function getNetScore(gross: number, handicap: number, strokeIndex: number, useHandicap: boolean) {

@@ -1,9 +1,8 @@
 "use client";
 
 import { Player, Score } from "@/lib/types";
-import { COURSES, TEAMS } from "@/lib/constants";
+import { COURSES, TEAMS, HOLES } from "@/lib/constants";
 import { getStrokesForHole } from "@/lib/scoring";
-import { HOLES } from "@/lib/constants";
 
 interface Props {
   players: Player[];
@@ -12,7 +11,7 @@ interface Props {
 
 function getTeamPlayers(players: Player[], teamIndex: number) {
   const names = TEAMS[teamIndex].players;
-  return players.filter((p) => names.includes(p.name as typeof names[number]));
+  return players.filter((p) => (names as readonly string[]).includes(p.name));
 }
 
 function teamNetTotal(teamPlayers: Player[], courseScores: Score[], useHandicap: boolean): number | null {
